@@ -1,33 +1,31 @@
-name: Combined Workflow
+name: iOS + LocalTunnel Workflow
 
 on:
   workflow_dispatch:
 
 jobs:
-  run-mac:
-    name: Run Mac VNC Server
+  ios-emulator:
+    name: Run iOS Simulator
     runs-on: macos-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install XQuartz
+      - name: Install dependencies
         run: brew install --cask xquartz
 
-      - name: Install TigerVNC
-        run: brew install tiger-vnc
-
-      - name: Start TigerVNC server
+      - name: Start iOS Simulator
         run: |
-          mkdir -p ~/.vnc
-          echo "123456" | vncpasswd -f > ~/.vnc/passwd
-          chmod 600 ~/.vnc/passwd
-          vncserver :1 -geometry 1280x720 -depth 24
+          echo "Starting iOS Simulator..."
+          xcrun simctl list
+          xcrun simctl boot "iPhone 14"
+          xcrun simctl bootstatus "iPhone 14"
+          open -a Simulator
 
   localtunnel:
     name: Start LocalTunnel
     runs-on: ubuntu-latest
-    needs: run-mac
+    needs: ios-emulator
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -40,7 +38,7 @@ jobs:
       - name: Install LocalTunnel
         run: npm install -g localtunnel
 
-      - name: Start Python server (background)
+      - name: Start simple HTTP server (background)
         run: |
           nohup python3 -m http.server 8000 &
           sleep 3
