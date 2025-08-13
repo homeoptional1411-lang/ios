@@ -1,29 +1,49 @@
-name: LocalTunnel Server
+name: Combined Workflow
 
 on:
   workflow_dispatch:
 
 jobs:
-  serve:
-    runs-on: ubuntu-latest
+  run-mac:
+    runs-on: macos-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Node.js install karo
+      - name: Install XQuartz
+        run: brew install --cask xquartz
+
+      - name: Install TigerVNC
+        run: brew install tiger-vnc
+
+      - name: Start TigerVNC server
+        run: |
+          mkdir -p ~/.vnc
+          echo "123456" | vncpasswd -f > ~/.vnc/passwd
+          chmod 600 ~/.vnc/passwd
+          vncserver :1
+
+  localtunnel:
+    runs-on: ubuntu-latest
+    needs: run-mac
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - name: LocalTunnel install karo
+      - name: Install LocalTunnel
         run: npm install -g localtunnel
 
-      - name: Server run karo (background mein)
+      - name: Start Python server (background)
         run: |
           nohup python3 -m http.server 8000 &
           sleep 3
 
-      - name: LocalTunnel start karo
+      - name: Start LocalTunnel
         run: |
           lt --port 8000 --subdomain mera-test &
           sleep 5
