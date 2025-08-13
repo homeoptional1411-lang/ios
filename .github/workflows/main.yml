@@ -5,6 +5,7 @@ on:
 
 jobs:
   run-mac:
+    name: Run Mac VNC Server
     runs-on: macos-latest
     steps:
       - name: Checkout repository
@@ -21,9 +22,10 @@ jobs:
           mkdir -p ~/.vnc
           echo "123456" | vncpasswd -f > ~/.vnc/passwd
           chmod 600 ~/.vnc/passwd
-          vncserver :1
+          vncserver :1 -geometry 1280x720 -depth 24
 
   localtunnel:
+    name: Start LocalTunnel
     runs-on: ubuntu-latest
     needs: run-mac
     steps:
