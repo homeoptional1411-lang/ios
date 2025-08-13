@@ -12,9 +12,9 @@ jobs:
         run: |
           brew install --cask xquartz
 
-      - name: Install TigerVNC (Correct package)
+      - name: Install TigerVNC (Correct)
         run: |
-          brew install tigervnc
+          brew install tiger-vnc
 
       - name: Install Node.js
         run: |
