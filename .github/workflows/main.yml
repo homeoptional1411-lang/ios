@@ -1,4 +1,4 @@
-name: Run iOS Simulator on Mac
+name: Run Mac with VNC and LocalTunnel
 
 on:
   workflow_dispatch:
@@ -6,35 +6,31 @@ on:
 jobs:
   run-mac:
     runs-on: macos-latest
+
     steps:
-      - name: Install Homebrew packages
+      - name: Install XQuartz
         run: |
           brew install --cask xquartz
-          brew install tigervnc
-          brew install --cask novnc
 
-      - name: Install Node + LocalTunnel
+      - name: Install TigerVNC
+        run: |
+          brew install tiger-vnc
+
+      - name: Install Node.js
         run: |
           brew install node
+
+      - name: Install LocalTunnel
+        run: |
           npm install -g localtunnel
 
       - name: Start VNC Server
         run: |
-          export PATH="$(brew --prefix)/bin:$PATH"
-          tigervncserver -geometry 1280x800
+          vncserver :1 -geometry 1280x720 -depth 24
+          echo "VNC server started on display :1"
 
-      - name: Start noVNC
+      - name: Expose VNC with LocalTunnel
         run: |
-          /Applications/novnc/utils/novnc_proxy --vnc localhost:5901 --listen 8080 &
-
-      - name: Start LocalTunnel
-        run: |
-          lt --port 8080 --subdomain ios-sim-test > lt_url.txt &
+          lt --port 5901 --subdomain mymacvnc &
           sleep 5
-          cat lt_url.txt
-
-      - name: Boot iOS Simulator
-        run: |
-          xcrun simctl boot "iPhone 14"
-          xcrun simctl bootstatus "iPhone 14" -b
-          echo "iOS Simulator Ready!"
+          echo "Connect to your VNC at: https://mymacvnc.loca.lt"
