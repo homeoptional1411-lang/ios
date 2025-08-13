@@ -1,31 +1,32 @@
-name: run-mac
+name: LocalTunnel Server
 
 on:
   workflow_dispatch:
 
 jobs:
-  run-mac:
-    runs-on: macos-latest
+  serve:
+    runs-on: ubuntu-latest
     steps:
-      - name: Install XQuartz
-        run: brew install --cask xquartz
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Install TigerVNC
-        run: brew install tiger-vnc
+      - name: Node.js install karo
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-      - name: Set VNC Password (full path method)
-        run: |
-          mkdir -p ~/.vnc
-          /opt/homebrew/opt/tiger-vnc/bin/vncpasswd -f <<< "mypassword" > ~/.vnc/passwd
-          chmod 600 ~/.vnc/passwd
-
-      - name: Start VNC Server
-        run: |
-          /opt/homebrew/opt/tiger-vnc/bin/vncserver :1
-          sleep 5
-
-      - name: Install LocalTunnel
+      - name: LocalTunnel install karo
         run: npm install -g localtunnel
 
-      - name: Expose VNC via LocalTunnel
-        run: lt --port 5901 --subdomain mymacvnc
+      - name: Server run karo (background mein)
+        run: |
+          nohup python3 -m http.server 8000 &
+          sleep 3
+
+      - name: LocalTunnel start karo
+        run: |
+          lt --port 8000 --subdomain mera-test &
+          sleep 5
+
+      - name: Show tunnel link
+        run: echo "Public link ready: https://mera-test.loca.lt"
