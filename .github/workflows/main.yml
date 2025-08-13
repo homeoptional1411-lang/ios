@@ -13,6 +13,7 @@ jobs:
           npm install -g localtunnel
           git clone https://github.com/novnc/noVNC.git ~/noVNC
           git clone https://github.com/novnc/websockify ~/noVNC/utils/websockify
+          echo "/opt/homebrew/bin" >> $GITHUB_PATH
 
       - name: Start iOS Simulator
         run: |
@@ -21,7 +22,7 @@ jobs:
 
       - name: Start VNC + noVNC
         run: |
-          vncserver :1 -geometry 1280x720 -depth 24
+          /opt/homebrew/bin/vncserver :1 -geometry 1280x720 -depth 24
           nohup ~/noVNC/utils/novnc_proxy --vnc localhost:5901 --listen 8080 &
 
       - name: Start LocalTunnel
