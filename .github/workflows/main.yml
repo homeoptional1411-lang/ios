@@ -9,28 +9,27 @@ jobs:
 
     steps:
       - name: Install XQuartz
-        run: |
-          brew install --cask xquartz
+        run: brew install --cask xquartz
 
-      - name: Install TigerVNC (Correct)
-        run: |
-          brew install tiger-vnc
+      - name: Install TigerVNC
+        run: brew install tiger-vnc
 
-      - name: Install Node.js
+      - name: Install Node.js and LocalTunnel
         run: |
           brew install node
-
-      - name: Install LocalTunnel
-        run: |
           npm install -g localtunnel
 
-      - name: Start VNC Server
-        run: |
-          vncserver :1 -geometry 1280x720 -depth 24
-          echo "VNC server started on display :1"
+      - name: Add TigerVNC to PATH
+        run: echo "/opt/homebrew/opt/tiger-vnc/bin" >> $GITHUB_PATH
 
-      - name: Expose VNC with LocalTunnel
+      - name: Set VNC Password
         run: |
-          lt --port 5901 --subdomain mymacvnc &
-          sleep 5
-          echo "Connect to your VNC at: https://mymacvnc.loca.lt"
+          mkdir -p ~/.vnc
+          echo "mypassword" | vncpasswd -f > ~/.vnc/passwd
+          chmod 600 ~/.vnc/passwd
+
+      - name: Start VNC Server
+        run: vncserver :1 -geometry 1280x720 -depth 24
+
+      - name: Expose with LocalTunnel
+        run: lt --port 5901 --subdomain mymacvnc
