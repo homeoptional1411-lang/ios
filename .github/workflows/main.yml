@@ -7,9 +7,10 @@ jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: Install noVNC
+      - name: Install Dependencies
         run: |
-          brew install tigervnc
+          brew install tiger-vnc node
+          npm install -g localtunnel
           git clone https://github.com/novnc/noVNC.git ~/noVNC
           git clone https://github.com/novnc/websockify ~/noVNC/utils/websockify
 
@@ -18,13 +19,20 @@ jobs:
           open -a Simulator
           sleep 20
 
-      - name: Start VNC Server
+      - name: Start VNC + noVNC
         run: |
-          vncserver -localhost no :1
-          export DISPLAY=:1
+          vncserver :1 -geometry 1280x720 -depth 24
           nohup ~/noVNC/utils/novnc_proxy --vnc localhost:5901 --listen 8080 &
+
+      - name: Start LocalTunnel
+        run: |
+          lt --port 8080 --subdomain ioscloudsim &
+          sleep 5
+          echo "===================================="
+          echo "iOS Simulator public URL below:"
+          echo "https://ioscloudsim.loca.lt/vnc.html"
+          echo "===================================="
 
       - name: Keep Alive
         run: |
-          echo "Simulator running... Press Ctrl+C to stop."
-          sleep 21600 # 6 hours
+          sleep 21600
